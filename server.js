@@ -2,16 +2,22 @@ var express = require('express');
 var app = express();   //aplication server object assigned to var app
 var http = require('http');
 var piblaster = require('pi-blaster.js');    //include pi-blaster for PWM of raspi
-var state = 0     // zero represents lock state, everytime server starts should be locked!
+//var state = 0     // zero represents lock state, everytime server starts should be locked!
 
 app.use(express.static('public'));  //static files to be served , living in public folder
 
 app.post('/lock', function(req, res){
-  console.log("LOCKED", req.body)
-  piblaster.setPwm(22, 0.145);    //setting pulse width modulation for locking
-  if (state == 0){
+  if(state == 0){  //if state == 0, it is locked, you want to unlock
+    console.log("closed state : " + state, req.body)
     state = 1
-    piblaster.setPwm(22, 0.1); //setting the pulse width modulation for unlocking 
+    piblaster.setPwm(22, 0.1); //setting the pulse width modulation for unlocking
+  }
+
+  else if(state == 1){  //if state == 1, it is unlocked and want to lock
+    console.log("open state: " + state, req.body)
+    state = 0    // locked state
+    piblaster.setPwm(22, 0.145);    //setting pulse width modulation for locking
+
   }
   res.send('POST request to homepage')
 });
